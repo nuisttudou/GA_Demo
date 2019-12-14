@@ -11,3 +11,7 @@ numpy
 pandas
 
 and love
+
+# 参考
+https://pypi.org/project/pyeasyga/
+https://pyeasyga.readthedocs.io/en/latest/
