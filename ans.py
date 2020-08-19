@@ -20,6 +20,8 @@ import pandas as pd
 import numpy as np
 import time
 from pyeasyga import pyeasyga
+
+import random
 def create_individual(data):
     data=plane_data_in
     x=np.zeros((NUM_OF_G, NUM_OF_PLANE))
@@ -70,16 +72,20 @@ t_in=time.time()
 plane_data_in=np.array(pd.read_csv('./plane.csv',header=None))
 G_data_in=np.array(pd.read_csv('./G.csv',header=None))
 plane_NUM_OF_G=np.r_[plane_data_in,plane_data_in,plane_data_in,plane_data_in]
-#ga = pyeasyga.GeneticAlgorithm(plane_NUM_OF_G,population_size=200,
-#                               generations=200,maximise_fitness=False)#,elitism=True
+
+data=plane_NUM_OF_G
+
+# ga = pyeasyga.GeneticAlgorithm(plane_NUM_OF_G,population_size=200,
+#                                 generations=200,maximise_fitness=False)#,elitism=True
 #
+
 ga = pyeasyga.GeneticAlgorithm(data,
-                               population_size=50,
-                               generations=50,
-                               crossover_probability=0.8,
-                               mutation_probability=0.05,
-                               elitism=True,
-                               maximise_fitness=False)
+                                population_size=50,
+                                generations=50,
+                                crossover_probability=0.8,
+                                mutation_probability=0.05,
+                                elitism=True,
+                                maximise_fitness=False)
 
 
 ga.fitness_function = fitness               # set the GA's fitness function
