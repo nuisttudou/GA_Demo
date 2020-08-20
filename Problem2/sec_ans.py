@@ -3,21 +3,16 @@ import numpy as np
 import time
 import random
 import heapq
-
 from pyeasyga import pyeasyga
 t_in=time.time()
 
-
 NUM_OF_PLANE=374
 NUM_OF_G=199
-
-
 
 #%%读取
 info_data_in=pd.read_csv('航班信息表1.csv',header=0)
 plane_park_in=pd.read_csv('./CAN登机口信息表(8.12).csv',header=0)
 plane_index=np.array(info_data_in['序号']).astype(int)
-#Cfi=np.array(info_data_in['机位型']).astype(int)
 plane_country=np.array(info_data_in['属性']).astype(int)#国内/国际
 plane_in_time=np.array(info_data_in['计划到达']).astype(float)
 plane_out_time=np.array(info_data_in['计划起飞']).astype(float)
@@ -42,20 +37,14 @@ park_exit_walk_time=np.array(plane_park_in['出发行走时间']).astype(float)
 park_passby_walk_time=np.array(plane_park_in['中转行走时间']).astype(float)
 
 #%% 映射
-
 park_port_set=list(set(park_port))
 port2num={}
 num2port={}
-
 for i in range(0,len(park_port_set)):
     num2port[i]=park_port_set[i]
     port2num[park_port_set[i]]=i
-    
 park_port_num=[port2num[i] for i in park_port] #登机口对应的机位
 
-
-#%%
-# indexx=list(range(0,NUM_OF_G))
 #%% 国内国际机位
 
 can_use_country=[[],[],[]] #park
@@ -68,8 +57,6 @@ for i in range(0,len(can_use_country[2])):
         can_use_country[0].append(can_use_country[2][i])
     if can_use_country[1].count(can_use_country[2][i])==0:
         can_use_country[1].append(can_use_country[2][i])
-
-# can_use_country=[]
 
 #%% CDEF种类
 can_use_category=[[],[],[],[],[]] #park 
@@ -86,8 +73,6 @@ NUM_OF_PLANE_CALCULATE=NUM_OF_PLANE-plane_remote_num
 #%%
 data=[]
 
-
-
 class P:
     def __init__(self,port_num,outtime):
         self.port_num=port_num
@@ -97,23 +82,15 @@ class P:
     
 #%%
 def create_individual(data):
-    # x=np.zeros(( NUM_OF_PLANE,NUM_OF_G))
-    
     port_canuse_country=[set(can_use_country[0]),set(can_use_country[1])]
     port_canuse_category=[[],set(can_use_category[1]),set(can_use_category[2])
                           ,set(can_use_category[3]),set(can_use_category[4])]
     plane_have_port=[]
-    
-    
     used_prot_heap=[]
-    
-    
     for i in range(0,NUM_OF_PLANE):
         if is_remote[i]:
             continue
-        
         now_intime=plane_in_time[i]
-        
         while len(used_prot_heap)>0 and used_prot_heap[0].outtime<=now_intime:
             top_item=heapq.heappop(used_prot_heap)
             top=top_item.port_num
@@ -129,19 +106,12 @@ def create_individual(data):
             my_can_use=my_can_use or port_canuse_category[j]
         my_can_use=my_can_use and port_canuse_country[plane_country[i]]
         
-        
-        # if plane_out_time[i]-plane_in_time[j]>=6/24: #6h 直接停远机位
-        #     now_have_port=128 #128为远位
-        # else: #在普通机位和远机位选一个
         my_can_use_list=list(my_can_use)
         
-        # print(i)
         now_have_port_index=random.randint(0,len(my_can_use)-1)
         now_have_port=my_can_use_list[now_have_port_index]
         
         now_have_finished_time=plane_out_time[i]
-        
-        # plane_have_port.append((i,now_have_port))
         
         if now_have_port in port_canuse_country[0]:
             port_canuse_country[0].remove(now_have_port)
@@ -151,17 +121,11 @@ def create_individual(data):
         heapq.heappush(used_prot_heap,P(now_have_port,now_have_finished_time+5/60/24))# 5分钟安全
         
         plane_have_port.append(now_have_port)
-        # x[i][now_have_port]=1;
-        
-        
     return plane_have_port
-        # x=x.astype(int).flatten().tolist()
-        # return x
 
 #%%
 def fitness1(plane_have_port, data):
     values=0
-    # print('!')
     for i in range(0,NUM_OF_PLANE_CALCULATE):
         port_num=plane_have_port[i]
         
@@ -174,7 +138,6 @@ def fitness1(plane_have_port, data):
 def fitness2(plane_have_port, data):
     values=0
     zi=0
-    # print('?')
     for i in range(0,NUM_OF_PLANE_CALCULATE):
         port_num=plane_have_port[i]
         
@@ -187,10 +150,6 @@ def fitness2(plane_have_port, data):
         zi+=plane_passby_people[i]*park_passby_walk_time[port_num]*(1-park_is_near[port_num])
     
     return zi/values
-
-
-
-
 #%%
 ga2 = pyeasyga.GeneticAlgorithm(data,
                                 population_size=50,
@@ -205,10 +164,8 @@ ga2.run()
 
 print(ga2.best_individual()[0])
 t=np.array(ga2.best_individual()[1])
-# print(t)
 
 #%%
-# print("ga-answer:",ga2.best_individual()[0])
 plane_have_port_best_2=list(ga2.best_individual()[1])
 
 for i in plane_remote_index:
@@ -216,7 +173,6 @@ for i in plane_remote_index:
 
 values_best_2=0
 zi=0
-# print('?')
 for i in range(0,NUM_OF_PLANE):
     port_num=plane_have_port_best_2[i]
     
@@ -229,12 +185,10 @@ for i in range(0,NUM_OF_PLANE):
     zi+=plane_passby_people[i]*park_passby_walk_time[port_num]*(1-park_is_near[port_num])
 
 print('ans:',1-zi/values_best_2)
-# print(plane_have_port_best_2)
 
 out=[]
 for i in range(0,len(plane_have_port_best_2)):
     out.append(num2port[plane_have_port_best_2[i]])
-# print(out)
 
 
 out_index=[ -2 for i in range(0,NUM_OF_PLANE+1)]
